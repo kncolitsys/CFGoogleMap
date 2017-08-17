@@ -1,0 +1,561 @@
+<!DOCTYPE HTML PUBLIC "-//W3C//DTD HTML 4.01 Transitional//EN">
+<html>
+<head>
+	<title>cf_googleMap Documentation</title>
+	<style type="text/css">
+	body, td {
+		font-family: Arial;
+		font-size: 12px;
+		}
+	th {
+		font-family: Arial;
+		font-size: 14px;
+		font-weight: bold;
+		background-color:#dcdcdc;
+		}
+	.small{font-size:10px;}
+	h1 {font-size:22px;color:#ffffff;background-color:#000000; padding: 3 3 3 10;}
+	h2 {font-size:18px;}
+	a {color:#0000ff;text-decoration:none;}
+	a:hover {text-decoration:underline;color:#ff0000}
+	</style>
+</head>
+<body>
+<h1>cf_googleMap Documentation</h1>
+<div class="small">
+	Version: 1.4<br>
+	Build Date: 6/10/2008<br>
+	License: <a href="http://www.apache.org/licenses/LICENSE-2.0" target="_blank">Apache License, Version 2</a><br/>
+	History<br>
+	<table>
+		<tr>
+			<td valign="top">1.4</td>
+			<td>
+				(1) Added the showTraffic attribute to the cf_googleMap tag.<br/>
+				(2) Added the showLocalSearch attribute to the cf_googleMap tag.<br/>
+				(3) Added a language attribute to the cf_googleMap tag.<br/>
+				(4) Added the enableZoomScroll to the cf_googleMap tag and defaulted it to true so a use can use their scroll wheel to zoom in and out<br/>
+				(5) Added the enableGE to the cf_googleMap tag and defaulted it to false to enable the Google Earth view of the map.<br/>
+			</td>
+		</tr>
+		<tr>
+			<td valign="top">1.3.1</td>
+			<td>
+				(1) Added the option to view a overview map.<br/>
+				(2) Added logic to not add the point to the map if the latitude or longitude are numeric<br/>
+				(3) Fixed zooming issue where controls are not active until the point is clicked or the map is dragged<br/>
+			</td>
+		</tr>
+		<tr>
+			<td valign="top">1.3</td>
+			<td>
+				(1) Changed the logic for the mainpoint attribute so it can be overwritten when a false value is passed.<br/>
+				(2) Added documentation for to the mainpoint and how it defaults to true when there is 1 point on a map<br/>
+				(3) Removed the default 1px blue border around the DIV container for the map and replaced it with a style attribute for the googlemap tag.<br/>
+				(4) Added the show attribute to the cf_googleMapPoint tag<br/>
+				(5) Added the GM_clearMap() JavaScript function<br/>
+				(6) Changed the max characters for the driving directions from 40 to 255<br/>
+				(7) Added <a href="exampleGeo.cfm">example</a> for using the geo.cfc Geocode<br/>
+				(8) Renamed the Geocode function to GeocodeUS<br/>
+				(9) Added a new Geocode function based off of code provided by <a href="http://www.jeffgladnick.com">Jeff Gladnick</a>. This should provide a much more accurate geocoding including international addresses.<br/>
+				(10) Added callJavaScript attribute to the cf_googleMapPoing tag<br/>
+			</td>
+		</tr>
+		<tr>
+			<td>1.2</td>
+			<td>Added fit points to map functionality</td>
+		</tr>
+		<tr>
+			<td>1.1</td>
+			<td>Changed tag to work with version 2 of the API and draggable points</td>
+		</tr>
+		<tr>
+			<td>1.0</td>
+			<td>Initial Release</td>
+		</tr>
+	</table>
+</div>
+<h1>Table of Contents</h1>
+<ol>
+	<li><b><a href="#overview">Overview</a></b></li>
+	<li>
+		<b>Tag Attributes</b>
+		<ul type="disc">
+			<li><a href="#CF_GoogleMap">CF_GoogleMap</a></li>
+			<li><a href="#CF_GoogleMapIcon">CF_GoogleMapIcon</a></li>
+			<li><a href="#CF_GoogleMapLine">CF_GoogleMapLine</a></li>
+			<li><a href="#CF_GoogleMapPoint">CF_GoogleMapPoint</a></li>
+			<li><a href="#CF_GoogleMapShow">CF_GoogleMapShow</a></li>
+		</ul>
+	</li>
+	<li>
+		<b>JavaScript API</b>
+		<ul type="disc">
+			<li><a href="#GM_viewProperty">GM_viewProperty</a></li>
+			<li><a href="#GM_createMarker">GM_createMarker</a></li>
+			<li><a href="#GM_clearMap">GM_clearMap</a></li>
+		</ul>
+	</li>
+	<li>
+		<b>Examples</b>
+		<ul type="disc">
+			<li><a href="example1.cfm">Creating a basic map</a></li>
+			<li><a href="example2.cfm">Using Custom Icons</a></li>	
+			<li><a href="example3.cfm">Drawing Lines on the Map</a></li>
+			<li><a href="example4.cfm">Create custom content for the information windows</a></li>
+			<li><a href="example5.cfm">Directions</a></li>
+			<li><a href="example6.cfm">Directions To / From</a></li>
+			<li><a href="example7.cfm">Draggable Points</a></li>
+			<li><a href="example8.cfm">Fit all points on a map</a></li>
+			<li><a href="example9.cfm">Using the overview map</a></li>
+			<li><a href="exampleGeo.cfm">Geocode an address (server side)</a></li>
+		</ul>
+	</li>
+	<li>
+		<b>Resources</b>
+		<ul type="disc">
+			<li><a href="http://www.google.com/apis/maps/signup.html" target="_blank">Google Maps API Signup</a></li>
+			<li><a href="http://www.google.com/apis/maps/documentation/" target="_blank">Google Maps API Documentation</a></li>
+			<li><a href="http://geocoder.us/" target="blank">US Geocoder</a></li>
+			<li><a href="http://geonames.usgs.gov/stategaz/index.html" target="_blank">US Geographic Names Information System (GNIS)</a></li>
+			<li><a href="http://earth-info.nga.mil/gns/html/" target="_blank">National Geospatial-Intelligence Agency</a></li>
+			<li><a href="http://brainoff.com/geocoder/rest/" target="_blank">Brainoff.com REST Interface for GNS and US city data</a></li>
+			<li><a href="http://www.teamredline.com/zc/" target="_blank">US Postal Code database for $5.00</a></li>
+			<li><a href="http://www.jibble.org/ukpostcodes/" target="_blank">UK Postcodes</a></li>
+			
+		</ul>
+	</li>
+	<li><b><a href="#trouble">Troubleshooting</a></b></li>
+	<li><b><a href="#todo">To do...</a></b></li>
+</ol>
+
+<a name="overview"></a><h1>Overview</h1>
+CF_GoogleMap is a ColdFusion custom tag that allows for the integration of GoogleMaps into your website.
+There are 4 tags that you can use in combination to create various maps.<br>
+<ul>
+	<li>CF_GoogleMap: Is the main tag that the rest of the tags must be inside. Its purpose it to define the general map area and default view.</li>
+	<li>CF_GoogleMapIcon: Defines custom icons that you can use for points on the map.</li>
+	<li>CF_GoogleMapLine: Transforms CF_GoogleMapPoints into a pollygone. Allowing you to draw straigt lines on the map.</li>
+	<li>CF_GoogleMapPoint: Defines points on the map. These points can either be standard points with information windows or points to create a pollygone when inside of the CF_GoogleMapLine tag.</li>
+</ul>
+
+<hr noshade size="1">
+<h1>Tag Attributes</h1>
+<a name="CF_GoogleMap"></a><h2>CF_GoogleMap</h2> 
+<table width="95%" border="1" cellpadding="5" cellspacing="1">
+	<tr>
+		<th width="15%" nowrap>Attribute</th>
+		<th width="10%" nowrap>Req/Opt</th>
+		<th width="10%" nowrap>Default</th>
+		<th width="65%">Description</th>
+	</tr>
+	<tr>
+		<td valign="top">Key</td>
+		<td valign="top">Required</td>
+		<td valign="top">&nbsp;</td>
+		<td valign="top">
+		This is your key that you get when you sign up for the Google Maps API. You can sign up for this Key at <a href="http://www.google.com/apis/maps/signup.html" target="_blank">http://www.google.com/apis/maps/signup.html</a>.
+		</td>
+	</tr>
+	<tr>
+		<td valign="top">Width</td>
+		<td valign="top">Optional</td>
+		<td valign="top">600</td>
+		<td valign="top">Width of the map.</td>
+	</tr>
+	<tr>
+		<td valign="top">Height</td>
+		<td valign="top">Optional</td>
+		<td valign="top">450</td>
+		<td valign="top">Height of the map.</td>
+	</tr>
+	<tr>
+		<td valign="top">DefaultCSS</td>
+		<td valign="top">Optional</td>
+		<td valign="top">True</td>
+		<td valign="top">
+		A True/False flag saying if you would like the tag to output it's default CSS for the popup window.
+		The map uses a class name of <b>.GM_InfoWindow</b> so if you want to customize the style you can set this value
+		to False and create this class name in your existing CSS file.
+		</td>
+	</tr>
+	<tr>
+		<td valign="top">ControlType</td>
+		<td valign="top">Optional</td>
+		<td valign="top">Large</td>
+		<td valign="top">
+		Large/Small are the 2 types of possible controls that allow the user to zoom in/out.
+		</td>
+	</tr>
+	<tr>
+		<td valign="top">showTraffic</td>
+		<td valign="top">Optional</td>
+		<td valign="top">false</td>
+		<td valign="top">
+		A True/False flag saying if you would like to show the traffic on the initial load of the map.
+		</td>
+	</tr>
+	<tr>
+		<td valign="top">showLocalSearch</td>
+		<td valign="top">Optional</td>
+		<td valign="top">false</td>
+		<td valign="top">
+		A True/False flag saying if you would like to show the local search box on the map.
+		</td>
+	</tr>
+	<tr>
+		<td valign="top">language</td>
+		<td valign="top">Optional</td>
+		<td valign="top">en</td>
+		<td valign="top">
+		A 2 character ISO language code. A list of supported language can be found <a href="http://code.google.com/support/bin/answer.py?answer=60737&topic=12267">here</a>.
+		</td>
+	</tr>
+	<tr>
+		<td valign="top">enableZoomScroll</td>
+		<td valign="top">Optional</td>
+		<td valign="top">true</td>
+		<td valign="top">
+		A True/False flag enabeling the scroll wheel to be used for zooming in and out of the map.
+		</td>
+	</tr>
+	<tr>
+		<td valign="top">enableGE</td>
+		<td valign="top">Optional</td>
+		<td valign="top">false</td>
+		<td valign="top">
+		A True/False flag saying if you would like to show the option for the Google Earth view. Please note that a plug-in is used for this.
+		</td>
+	</tr>
+	<tr>
+		<td valign="top">MapType</td>
+		<td valign="top">Optional</td>
+		<td valign="top">Map</td>
+		<td valign="top">
+		MAP,HYBRID,SATELLITE are the 3 types of possible default maps.
+		</td>
+	</tr>
+	<tr>
+		<td valign="top">Level</td>
+		<td valign="top">Optional</td>
+		<td valign="top">12</td>
+		<td valign="top">
+		Zoom level you initially want the map zoomed to
+		</td>
+	</tr>
+	<tr>
+		<td valign="top">CenterLon</td>
+		<td valign="top">Optional</td>
+		<td valign="top">&nbsp;</td>
+		<td valign="top">
+		This is the default center longitude for the when the map loads. If there is no value for this and there is just 1 point the longitude of that point will be used.
+		If there is no value for this and there is a point with the <a href="#mainpoint">MainPoint</a> attribute it will use the longitude from that point. If there is not a 
+		value after all this it will default to a Longitude point roughly in the center of the United States at -98.7451171875.
+		</td>
+	</tr>
+	<tr>
+		<td valign="top">CenterLat</td>
+		<td valign="top">Optional</td>
+		<td valign="top">&nbsp;</td>
+		<td valign="top">
+		This is the default center latitude for the when the map loads. If there is no value for this and there is just 1 point the latitude of that point will be used.
+		If there is no value for this and there is a point with the <a href="#mainpoint">MainPoint</a> attribute it will use the latitude from that point. If there is not a 
+		value after all this it will default to a latitude point roughly in the center of the United States at 40.1452892956766.
+		</td>
+	</tr>
+	<tr>
+		<td valign="top">BrowserNotCompatible</td>
+		<td valign="top">Optional</td>
+		<td valign="top">&nbsp;</td>
+		<td valign="top">
+		This is the error that the user sees when their browser is not compatible with Google Maps.
+		The default error message is "We're sorry but your browser is not compatible with Google Maps".
+		</td>
+	</tr>
+	<tr>
+		<td valign="top">dragStart</td>
+		<td valign="top">Optional</td>
+		<td valign="top">&nbsp;</td>
+		<td valign="top">
+		JavaScript that is executed when a point is started to be dragged. Both lon and lat JavaScript variables are present already for you to use.
+		</td>
+	</tr>
+	<tr>
+		<td valign="top">dragEnd</td>
+		<td valign="top">Optional</td>
+		<td valign="top">&nbsp;</td>
+		<td valign="top">
+		JavaScript that is executed when a point has stopped being dragged. Both lon and lat JavaScript variables are present already for you to use.
+		</td>
+	</tr>
+	<tr>
+		<td valign="top">fitPointsToMap</td>
+		<td valign="top">Optional</td>
+		<td valign="top">false</td>
+		<td valign="top">
+		A True/False flag saying if you would like all of the points to fit on the map when it is initially loaded. The map will automatically set the correct zoom and center location based on all the points passed into the tag.
+		</td>
+	</tr>
+	<tr>
+		<td valign="top">style</td>
+		<td valign="top">Optional</td>
+		<td valign="top">&nbsp;</td>
+		<td valign="top">Any inline CSS that you would like applied to the DIV container that the map is in. Please note that the width and the height attributes are already populated from the width and height attributes.</td>
+	</tr>
+	<tr>
+		<td valign="top">overviewMap</td>
+		<td valign="top">Optional</td>
+		<td valign="top">false</td>
+		<td valign="top">A True/False flag saying if you would like the overview map on the page</td>
+	</tr>
+	<tr>
+		<td valign="top">overviewMapWidth</td>
+		<td valign="top">Optional</td>
+		<td valign="top">200</td>
+		<td valign="top">The width in pixels of the overview map</td>
+	</tr>
+	<tr>
+		<td valign="top">overviewMapHeight</td>
+		<td valign="top">Optional</td>
+		<td valign="top">200</td>
+		<td valign="top">The height in pixels of the overview map</td>
+	</tr>
+	<tr>
+		<td valign="top">proxyURL</td>
+		<td valign="top">Optional</td>
+		<td valign="top">&nbsp;</td>
+		<td valign="top">A relative URL to the proxy.cfm file. Since Google Maps API does not support calling the main JavaScript in an SSL environment. The main JavaScript must be called through a proxy to go and get the file and return it in an unsecure manner. There is also a bit of caching built into the proxy.cfm. It stores the returned JavaScript within the application.cfGoogleMap.JSCache variable. (If your network requires the use of proxies you can set these within the proxy.cfm file.</td>
+	</tr>
+</table>
+<a name="CF_GoogleMapIcon"></a><h2>CF_GoogleMapIcon</h2> 
+<table width="95%" border="1" cellpadding="5" cellspacing="1">
+	<tr>
+		<th width="15%" nowrap>Attribute</th>
+		<th width="10%" nowrap>Req/Opt</th>
+		<th width="10%" nowrap>Default</th>
+		<th width="65%">Description</th>
+	</tr>
+	<tr>
+		<td valign="top">IconURL</td>
+		<td valign="top">Required</td>
+		<td valign="top">&nbsp;</td>
+		<td valign="top">
+		This is your url to your custom icon relative to the page that it is loading on.
+		Your icon needs to be a PNG.
+		You do not need a full url like http://mydomain.com/logo.png you can just use a path like /images/logo.png
+		</td>
+	</tr>
+	<tr>
+		<td valign="top">IconName</td>
+		<td valign="top">Required</td>
+		<td valign="top">&nbsp;</td>
+		<td valign="top">This is the name of the icon. You will refer to this name later when using it in a point (make sure that the point name does not contain a dash "-")</td>
+	</tr>
+	<tr>
+		<td valign="top">Width</td>
+		<td valign="top">Required</td>
+		<td valign="top">&nbsp;</td>
+		<td valign="top">Width of the icon.</td>
+	</tr>
+	<tr>
+		<td valign="top">Height</td>
+		<td valign="top">Required</td>
+		<td valign="top">&nbsp;</td>
+		<td valign="top">Height of the icon.</td>
+	</tr>
+	<tr>
+		<td valign="top">IconAnchor</td>
+		<td valign="top">Optional</td>
+		<td valign="top">1/2 of the width attribute,1/2 of the height attribute</td>
+		<td valign="top">The pixel coordinate relative to the top left corner of the icon image at which we should anchor this icon to the map. For example if you have an icon that is 20 x 20 and you wanted to anchor it from the center bottom your value that you pass would be "10,20"</td>
+	</tr>
+	<tr>
+		<td valign="top">InfoWindowAnchor</td>
+		<td valign="top">Optional</td>
+		<td valign="top">1/2 of the width attribute,2</td>
+		<td valign="top">The pixel coordinate relative to the top left corner of the icon image at which we should anchor the info window to this icon. For example if you have an icon that is 20 x 20 and you wanted to anchor it from the center top your value that you pass would be "10,1"</td>
+	</tr>
+</table>
+<a name="CF_GoogleMapLine"></a><h2>CF_GoogleMapLine</h2> 
+<table width="95%" border="1" cellpadding="5" cellspacing="1">
+	<tr>
+		<th width="15%" nowrap>Attribute</th>
+		<th width="10%" nowrap>Req/Opt</th>
+		<th width="10%" nowrap>Default</th>
+		<th width="65%">Description</th>
+	</tr>
+	<tr>
+		<td valign="top">Color</td>
+		<td valign="top">Optional</td>
+		<td valign="top">#ff0000</td>
+		<td valign="top">
+		Hex color of the line
+		</td>
+	</tr>
+	<tr>
+		<td valign="top">Size</td>
+		<td valign="top">Optional</td>
+		<td valign="top">4</td>
+		<td valign="top">This is the thickness of the line</td>
+	</tr>
+	<tr>
+		<td valign="top">Opacity</td>
+		<td valign="top">Optional</td>
+		<td valign="top">0.5</td>
+		<td valign="top">A value between 0 and 1 determining the opacity of the line being drawn.</td>
+	</tr>
+</table>
+<a name="CF_GoogleMapPoint"></a><h2>CF_GoogleMapPoint</h2> 
+<table width="95%" border="1" cellpadding="5" cellspacing="1">
+	<tr>
+		<th width="15%" nowrap>Attribute</th>
+		<th width="10%" nowrap>Req/Opt</th>
+		<th width="10%" nowrap>Default</th>
+		<th width="65%">Description</th>
+	</tr>
+	<tr>
+		<td valign="top">Lat</td>
+		<td valign="top">Required</td>
+		<td valign="top">&nbsp;</td>
+		<td valign="top">Latitude of the point.</td>
+	</tr>
+	<tr>
+		<td valign="top">Lon</td>
+		<td valign="top">Required</td>
+		<td valign="top">&nbsp;</td>
+		<td valign="top">Longitude of the point.</td>
+	</tr>
+	<tr>
+		<td valign="top">Title</td>
+		<td valign="top">Required</td>
+		<td valign="top">&nbsp;</td>
+		<td valign="top">
+		Info Window: Title of the window.<br>
+		(If the CF_GoogleMapPoint is inside a CF_GoogleMapLine this attribure is not required.)
+		</td>
+	</tr>
+	<tr>
+		<td valign="top">Address</td>
+		<td valign="top">Required</td>
+		<td valign="top">&nbsp;</td>
+		<td valign="top">
+		Info Window: Address of the location.<br>
+		(If the CF_GoogleMapPoint is inside a CF_GoogleMapLine this attribure is not required.)
+		</td>
+	</tr>
+	<tr>
+		<td valign="top">IconName</td>
+		<td valign="top">Optional</td>
+		<td valign="top">&nbsp;</td>
+		<td valign="top">The name of the custom icon defined in the CF_GoogleMapIcon tag</td>
+	</tr>
+	<tr>
+		<td valign="top">PointName</td>
+		<td valign="top">Optional</td>
+		<td valign="top">markerN</td>
+		<td valign="top">The name of the point. You can later use this name by calling the JavaScript GM_viewProperty function. (make sure that the point name does not contain a dash "-")</td>
+	</tr>
+	<tr>
+		<td valign="top">MainPoint</td>
+		<td valign="top">Optional</td>
+		<td valign="top">&nbsp;</td>
+		<td valign="top">
+		If a CF_GoogleMapPoint has the MainPoint attribute the map will use that point as the main point for the map.
+		When the map loads it will center on this point and automatically open the information window.
+		This is useful when you have a main destination on the map and you want to relate other points to this.
+		If you only have 1 point it defaults the mainpoint attribute to TRUE. You can override this by passing the mainpoint
+		attribute with a FALSE value.
+		</td>
+	</tr>
+	<tr>
+		<td valign="top">Center</td>
+		<td valign="top">Optional</td>
+		<td valign="top">&nbsp;</td>
+		<td valign="top">
+		If a CF_GoogleMapPoint has the center attribute the map will use that point as the center point for the map when initially loaded.
+		</td>
+	</tr>
+	<tr>
+		<td valign="top">Draggable</td>
+		<td valign="top">Optional</td>
+		<td valign="top">false</td>
+		<td valign="top">
+		A true/false flag determining if the point is draggable.
+		</td>
+	</tr>
+	<tr>
+		<td valign="top">Show</td>
+		<td valign="top">Optional</td>
+		<td valign="top">true</td>
+		<td valign="top">
+		A true/false flag determining if the point shows when the page loads.
+		</td>
+	</tr>
+	<tr>
+		<td valign="top">callJavaScript</td>
+		<td valign="top">Optional</td>
+		<td valign="top">&nbsp;</td>
+		<td valign="top">
+		A string of input parameters to send to the onGmapBubbleClick() javascript function.  Ie   "'bill', 'smith', 45, 2006".
+		Please note that the tag does not output the onGmapBubbleClick() function rather than just call it. You will need to create 
+		this function and place your custom logic in there.
+		</td>
+	</tr>
+	
+</table>
+<a name="CF_GoogleMapShow"></a><h2>CF_GoogleMapShow</h2> 
+<p>
+Because not all of us program with 100% XHTML compliant code there is a work around to get the map to show
+in your HTML code. What you need to do is place the CF_GoogleMapShow right before your closing body tag and
+it will take the JavaScript content to render the map and execute it at the bottom of the page. You still 
+can have the map located anywhere in your HTML; its just the execution code needs to be at the end.
+</p>
+
+<a name="JavaScriptAPI"></a><h1>JavaScript API</h1>
+<a name="GM_viewProperty"></a><h2>GM_viewProperty</h2>
+<a name="GM_createMarker"></a><h2>GM_createMarker</h2>
+<a name="GM_clearMap"></a><h2>GM_clearMap</h2>
+<p>GM_clearMap() removes all points on the map. It takes no arguments.</p>
+
+<a name="trouble"></a><h1>Troubleshooting</h1> 
+<h2>My map works in FireFox but throws an error in IE</h2>
+<p>You need to make sure that you have the <pre>&lt;cf_googlemapshow/&gt;</pre> tag right before your closing body tag.</p>
+
+<h2>What happened to my application scope?</h2>
+<p>In the download there is an Application.cfm that sets the application.googleMapKey. This is just in there for the examples you can delete this and add the application.googleMapKey to your application.cfm/cfc</p>
+
+<h2>Why dosnet the geocode function return a lat/lon for my address in the UK, Japan and China?</h2>
+<p>The Maps API geocoder provides detailed geocoding for Andorra, Australia, Canada, France, Germany, Italy, Japan (but only in Japanese), Netherlands, New Zealand, Spain, and United States of America. For countries other than the UK and China it provides geocoding for country names and city names (e.g. "Nairobi, Kenya"). (<a href="http://hublog.hubmed.org/archives/001414.html">source</a>)</p>
+
+
+<a name="todo"></a><h1>To do...</h1> 
+<p>Here is a list of various items I would still like to add to this tag set. I am not sure if or when they will be added. It is just a public list of ideas</p>
+<ul>
+	<li>Tabbed information windows</li>
+	<li>Clustering points at different zoom levels</li>
+	<li>Add window.onunload = GUnload() automatically</li>
+	<li>Document GM_viewProperty and create example with external linked points to the map</li>
+	<li>Ability to have multiple maps per page</li>
+	<li>Client side geocoding</li>
+	<li>Add integrated driving directions</li>
+	<li>Add street view</li>
+	<li>Document and create examples of geo.cfc that is included in the release (some of the stuff in there is very cool)</li>
+	<li><s>SSL support through proxy URL</s></li>
+	<li><s>Add Google's geocoding as an option to get the lat/lon of an address</s></li>
+	<li><s>Ability to change the location of the points</s></li>
+	<li><s>Change the examples to use cfimport instead of cf_</s></li>
+	<li><s>Add local search</s></li>
+	<li><s>Add traffic</s></li>
+	<li><s>Add zoom in and out with scrolling</s></li>
+</ul>
+<script type="text/javascript">
+var gaJsHost = (("https:" == document.location.protocol) ? "https://ssl." : "http://www.");
+document.write(unescape("%3Cscript src='" + gaJsHost + "google-analytics.com/ga.js' type='text/javascript'%3E%3C/script%3E"));
+</script>
+<script type="text/javascript">
+var pageTracker = _gat._getTracker("UA-139648-2");
+pageTracker._initData();
+pageTracker._trackPageview();
+</script>
+</body>
+</html>
